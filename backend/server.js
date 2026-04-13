@@ -33,11 +33,22 @@ app.use('/api/auth', authRoutes);
 // SERVE FRONTEND IN PRODUCTION
 if (process.env.NODE_ENV === 'production') {
     const frontendPath = path.join(__dirname, '../frontend/dist');
+    
+    // Serve static files
     app.use(express.static(frontendPath));
     
+    // Catch-all for React Router
     app.get('*', (req, res) => {
         if (!req.path.startsWith('/api')) {
-            res.sendFile(path.resolve(frontendPath, 'index.html'));
+            const indexPath = path.resolve(frontendPath, 'index.html');
+            if (fs.existsSync(indexPath)) {
+                res.sendFile(indexPath);
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: "Frontend build files not found. Please check deployment logs."
+                });
+            }
         }
     });
 }
