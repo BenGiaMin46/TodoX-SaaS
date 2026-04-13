@@ -70,11 +70,17 @@ app.use((err, req, res, next) => {
 // Connect to MongoDB
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        const conn = await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s
+        });
+        console.log(`🚀 SaaS Database Connected: ${conn.connection.host}`);
     } catch (err) {
-        console.error(`Error: ${err.message}`);
-        process.exit(1);
+        console.error(`❌ MongoDB Connection Error: ${err.message}`);
+        console.log('TIP: Please ensure 0.0.0.0/0 is added to Network Access in MongoDB Atlas.');
+        // Don't exit immediately in production, let Render handle restarts
+        if (process.env.NODE_ENV !== 'production') {
+            process.exit(1);
+        }
     }
 };
 
