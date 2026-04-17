@@ -14,10 +14,17 @@ const api = axios.create({
 // Request interceptor for API calls
 api.interceptors.request.use(
     (config) => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const token = user?.token;
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser && storedUser !== 'undefined') {
+                const user = JSON.parse(storedUser);
+                const token = user?.token;
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            }
+        } catch (error) {
+            console.error("API Interceptor Error:", error);
         }
         return config;
     },
